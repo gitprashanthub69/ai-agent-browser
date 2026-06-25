@@ -1,0 +1,10 @@
+{
+  "firstName": "Prashant",
+  "lastName": "Sharma",
+  "email": "prashant.sharma@example.com",
+  "gender": "Male",
+  "mobile": "9876543210",
+  "currentAddress": "Hostel 7, IIT Bombay, Powai, Mumbai",
+  "state": "NCR",
+  "city": "Delhi"
+}
