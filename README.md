@@ -49,8 +49,8 @@ ai-browser-agent/
 
 ### 1. Clone the repo
 ```bash
-git clone https://github.com/YOUR_USERNAME/ai-browser-agent.git
-cd ai-browser-agent
+git clone https://github.com/gitprashanthub69/ai-agent-browser.git
+cd ai-agent-browser
 ```
 
 ### 2. Create and activate virtual environment
