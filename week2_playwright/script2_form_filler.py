@@ -34,8 +34,14 @@ async def fill_form(page, data: dict) -> None:
     await page.fill("#lastName", data["lastName"])
     await page.fill("#userEmail", data["email"])
 
-    gender_label = page.locator("label", has_text=data["gender"])
-    await gender_label.click()
+    gender = data["gender"].strip().lower()
+    if gender == "male":
+        await page.click("label[for='gender-radio-1']")
+    elif gender == "female":
+        await page.click("label[for='gender-radio-2']")
+    else:
+        gender_label = page.locator("label", has_text=data["gender"], exact=True)
+        await gender_label.first.click()
 
     await page.fill("#userNumber", data["mobile"])
     await page.fill("#currentAddress", data["currentAddress"])

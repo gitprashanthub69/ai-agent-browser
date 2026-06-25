@@ -1,0 +1,27 @@
+[
+  {
+    "url": "https://news.ycombinator.com/",
+    "title": "Hacker News",
+    "error": null
+  },
+  {
+    "url": "https://www.bbc.com/news",
+    "title": "BBC News - Breaking news, video and the latest top stories from the U.S. and around the world",
+    "error": null
+  },
+  {
+    "url": "https://www.python.org/",
+    "title": "Welcome to Python.org",
+    "error": null
+  },
+  {
+    "url": "https://playwright.dev/",
+    "title": "Fast and reliable end-to-end testing for modern web apps | Playwright",
+    "error": null
+  },
+  {
+    "url": "https://github.com/",
+    "title": "GitHub · Change is constant. GitHub keeps you ahead. · GitHub",
+    "error": null
+  }
+]
