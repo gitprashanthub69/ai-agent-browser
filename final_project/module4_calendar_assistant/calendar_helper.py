@@ -78,8 +78,8 @@ def create_event(summary, start_iso, end_iso, description="", attendees=None):
     event = {
         "summary": summary,
         "description": description,
-        "start": {"dateTime": start_iso},
-        "end": {"dateTime": end_iso},
+        "start": {"dateTime": start_iso, "timeZone": "Asia/Kolkata"},
+        "end": {"dateTime": end_iso, "timeZone": "Asia/Kolkata"},
     }
     if attendees:
         event["attendees"] = [{"email": a} for a in attendees]
@@ -95,24 +95,25 @@ def find_free_slots(date_iso, duration_minutes=30, work_start=9, work_end=18):
     Returns list of (start, end) ISO strings that are free.
     """
     service = get_calendar_service()
-    day_start = f"{date_iso}T{work_start:02d}:00:00Z"
-    day_end = f"{date_iso}T{work_end:02d}:00:00Z"
+    day_start = f"{date_iso}T{work_start:02d}:00:00+05:30"
+    day_end = f"{date_iso}T{work_end:02d}:00:00+05:30"
 
     busy = service.freebusy().query(body={
         "timeMin": day_start, "timeMax": day_end,
+        "timeZone": "Asia/Kolkata",
         "items": [{"id": "primary"}]
     }).execute()
 
     busy_slots = busy["calendars"]["primary"]["busy"]
 
     free = []
-    cursor = datetime.datetime.fromisoformat(day_start.replace("Z", "+00:00"))
-    end_of_day = datetime.datetime.fromisoformat(day_end.replace("Z", "+00:00"))
+    cursor = datetime.datetime.fromisoformat(day_start)
+    end_of_day = datetime.datetime.fromisoformat(day_end)
     delta = datetime.timedelta(minutes=duration_minutes)
 
     busy_ranges = [
-        (datetime.datetime.fromisoformat(b["start"].replace("Z", "+00:00")),
-         datetime.datetime.fromisoformat(b["end"].replace("Z", "+00:00")))
+        (datetime.datetime.fromisoformat(b["start"]),
+         datetime.datetime.fromisoformat(b["end"]))
         for b in busy_slots
     ]
 

@@ -8,11 +8,7 @@ import os
 import json
 import datetime
 import google.generativeai as genai
-
-try:
-    from .calendar_helper import create_event
-except ImportError:  # pragma: no cover - allows direct script execution
-    from calendar_helper import create_event
+from .calendar_helper import create_event
 
 genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
 model = genai.GenerativeModel("gemini-1.5-flash")

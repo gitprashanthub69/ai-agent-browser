@@ -12,8 +12,8 @@ from agent_runner import run_agent_task
 # Import routers from all modules
 from module1_form_filler.api import router as form_router
 from module2_email_assistant.api import router as email_router
-from module3_summariser.api import router as summary_router
-from module4_calendar.api import router as calendar_router
+from module3_vision_assistant.api import router as summary_router
+from module4_calendar_assistant.api import router as calendar_router
 from module6_memory.api import router as memory_router
 
 active_connections: dict[str, list[WebSocket]] = {}
