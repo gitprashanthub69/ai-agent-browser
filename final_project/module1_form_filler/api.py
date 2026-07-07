@@ -1,11 +1,11 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Any, Dict, Optional
 
-from profile_store import ProfileStore
-from form_filler import FormFiller
+from .profile_store import ProfileStore
+from .form_filler import FormFiller
 
-app = FastAPI(title="Module 1 Form Filler")
+router = APIRouter(tags=["Form Filler"])
 
 
 class ProfilePayload(BaseModel):
@@ -19,17 +19,17 @@ class ProfilePayload(BaseModel):
     sop: Optional[str] = None
 
 
-@app.get("/health")
+@router.get("/health")
 def health() -> Dict[str, Any]:
     return {"status": "ok", "module": "module1_form_filler"}
 
 
-@app.get("/form/profile")
+@router.get("/form/profile")
 def get_profile() -> Dict[str, Any]:
     return ProfileStore().load()
 
 
-@app.post("/form/profile")
+@router.post("/form/profile")
 def save_profile(payload: ProfilePayload) -> Dict[str, Any]:
     store = ProfileStore()
     data = {k: v for k, v in payload.dict().items() if v is not None}
@@ -37,7 +37,7 @@ def save_profile(payload: ProfilePayload) -> Dict[str, Any]:
     return store.load()
 
 
-@app.post("/form/fill")
+@router.post("/form/fill")
 def fill_form(url: str) -> Dict[str, Any]:
     from playwright.sync_api import sync_playwright
 

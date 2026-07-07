@@ -2,6 +2,10 @@ import { useState } from "react";
 import CommandPanel from "./components/CommandPanel";
 import ActivityLog from "./components/ActivityLog";
 import ProfileSettings from "./components/ProfileSettings";
+import FormModule from "./components/FormModule";
+import EmailModule from "./components/EmailModule";
+import SummaryModule from "./components/SummaryModule";
+import CalendarModule from "./components/CalendarModule";
 import "./App.css";
 
 export default function App() {
@@ -10,22 +14,23 @@ export default function App() {
   const [steps, setSteps] = useState([]);
   const [isRunning, setIsRunning] = useState(false);
 
+  const TABS = [
+    { id: "agent", icon: "🤖", label: "Agent" },
+    { id: "form", icon: "📋", label: "Form Filler" },
+    { id: "email", icon: "📧", label: "Email" },
+    { id: "summary", icon: "📄", label: "Summariser" },
+    { id: "calendar", icon: "📅", label: "Calendar" },
+    { id: "memory", icon: "🧠", label: "Memory" },
+    { id: "profile", icon: "⚙️", label: "Profile" },
+  ];
+
   return (
-    <div className="app-shell">
+    <div className="app-shell" style={{display: 'flex', flexDirection: 'row', height: '100vh', overflow: 'hidden'}}>
       <div className="ambient ambient-a" />
       <div className="ambient ambient-b" />
       <div className="ambient ambient-c" />
 
       <div className="particles">
-        <div className="particle" />
-        <div className="particle" />
-        <div className="particle" />
-        <div className="particle" />
-        <div className="particle" />
-        <div className="particle" />
-        <div className="particle" />
-        <div className="particle" />
-        <div className="particle" />
         <div className="particle" />
         <div className="particle" />
         <div className="particle" />
@@ -41,37 +46,8 @@ export default function App() {
           <div className="cube-face face-top" />
           <div className="cube-face face-bottom" />
         </div>
-        <div className="cube-3d inner-cube">
-          <div className="cube-face face-front" />
-          <div className="cube-face face-back" />
-          <div className="cube-face face-right" />
-          <div className="cube-face face-left" />
-          <div className="cube-face face-top" />
-          <div className="cube-face face-bottom" />
-        </div>
       </div>
 
-      <div className="scene-3d scene-right">
-        <div className="cube-3d outer-cube">
-          <div className="cube-face face-front" />
-          <div className="cube-face face-back" />
-          <div className="cube-face face-right" />
-          <div className="cube-face face-left" />
-          <div className="cube-face face-top" />
-          <div className="cube-face face-bottom" />
-        </div>
-        <div className="cube-3d inner-cube">
-          <div className="cube-face face-front" />
-          <div className="cube-face face-back" />
-          <div className="cube-face face-right" />
-          <div className="cube-face face-left" />
-          <div className="cube-face face-top" />
-          <div className="cube-face face-bottom" />
-        </div>
-      </div>
-
-
-      {/* 3D Holographic Search Globe (Fades in when searching) */}
       <div className={`search-globe-scene ${isRunning ? "active" : ""}`}>
         <div className="globe-3d">
           <div className="globe-ring ring-lat-1" />
@@ -84,32 +60,46 @@ export default function App() {
         </div>
       </div>
 
-      <nav className="navbar">
-        <div className="brand-block">
+      {/* SIDEBAR */}
+      <nav className="sidebar" style={{width: '260px', padding: '30px 20px', borderRight: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', zIndex: 10, background: 'rgba(5, 5, 10, 0.6)', backdropFilter: 'blur(20px)'}}>
+        <div className="brand-block" style={{marginBottom: '40px', display: 'flex', alignItems: 'center', gap: '12px'}}>
           <div className="brand-mark">✦</div>
           <div>
-            <p className="brand-title">AI Browser Agent</p>
+            <p className="brand-title" style={{fontSize: '1.2rem', margin: 0}}>AI Agent</p>
           </div>
         </div>
 
-        <div className="nav-links">
-          <button
-            className={page === "agent" ? "active" : ""}
-            onClick={() => setPage("agent")}
-          >
-            Agent
-          </button>
-          <button
-            className={page === "profile" ? "active" : ""}
-            onClick={() => setPage("profile")}
-          >
-            Profile
-          </button>
+        <div className="nav-links" style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
+          {TABS.map(tab => (
+            <button
+              key={tab.id}
+              className={page === tab.id ? "active" : ""}
+              onClick={() => setPage(tab.id)}
+              style={{
+                textAlign: 'left', 
+                padding: '12px 16px', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'flex-start',
+                width: '100%',
+                background: page === tab.id ? 'rgba(255,255,255,0.1)' : 'transparent',
+                border: 'none',
+                borderRadius: '8px',
+                color: page === tab.id ? '#fff' : 'rgba(255,255,255,0.6)',
+                fontWeight: page === tab.id ? '600' : '400',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <span style={{marginRight: '12px', fontSize: '1.1rem'}}>{tab.icon}</span> 
+              {tab.label}
+            </button>
+          ))}
         </div>
       </nav>
 
-      <main className="main-panel">
-        {page === "agent" ? (
+      {/* MAIN CONTENT AREA */}
+      <main className="main-panel" style={{flex: 1, padding: '40px 60px', overflowY: 'auto', zIndex: 10, margin: 0, maxWidth: '100%', display: 'block', height: '100%'}}>
+        {page === "agent" && (
           <div className="agent-layout">
             <CommandPanel
               onTaskStart={(id) => {
@@ -122,9 +112,22 @@ export default function App() {
             />
             <ActivityLog steps={steps} taskId={taskId} />
           </div>
-        ) : (
-          <ProfileSettings />
         )}
+        
+        {page === "form" && <FormModule />}
+        {page === "email" && <EmailModule />}
+        {page === "summary" && <SummaryModule />}
+        {page === "calendar" && <CalendarModule />}
+        {page === "memory" && (
+          <div className="module-panel">
+            <h2>Memory Storage</h2>
+            <p className="hint">View facts, preferences, and data saved from previous interactions.</p>
+            <div className="glass-panel" style={{padding: '20px', marginTop: '20px'}}>
+              <p style={{opacity: 0.7}}>No memories saved yet. (Module 6 backend connecting soon).</p>
+            </div>
+          </div>
+        )}
+        {page === "profile" && <ProfileSettings />}
       </main>
     </div>
   );

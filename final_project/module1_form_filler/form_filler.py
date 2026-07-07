@@ -4,8 +4,8 @@ import argparse
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-from profile_store import ProfileStore
-from form_detector import FormDetector
+from .profile_store import ProfileStore
+from .form_detector import FormDetector
 
 
 class FormFiller:
