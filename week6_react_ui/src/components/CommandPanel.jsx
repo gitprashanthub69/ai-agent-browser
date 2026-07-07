@@ -2,7 +2,7 @@ import { useState } from "react";
 
 const API_BASE = "http://localhost:8000";
 
-export default function CommandPanel({ onTaskStart, onStep }) {
+export default function CommandPanel({ onTaskStart, onStep, onTaskComplete }) {
   const [command, setCommand] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -26,19 +26,25 @@ export default function CommandPanel({ onTaskStart, onStep }) {
       const ws = new WebSocket(`ws://localhost:8000/ws/${task_id}`);
 
       ws.onmessage = (event) => {
-        onStep(event.data);
-        if (event.data === "🏁 DONE") {
+        if (event.data.includes("🏁 DONE")) {
           ws.close();
           setLoading(false);
+          if (onTaskComplete) onTaskComplete();
+        } else {
+          onStep(event.data);
         }
       };
 
       ws.onerror = () => {
         setError("WebSocket error — ensure the FastAPI server is running.");
         setLoading(false);
+        if (onTaskComplete) onTaskComplete();
       };
 
-      ws.onclose = () => setLoading(false);
+      ws.onclose = () => {
+        setLoading(false);
+        if (onTaskComplete) onTaskComplete();
+      };
     } catch (err) {
       setError(err.message || "Unable to start the agent.");
       setLoading(false);
@@ -49,8 +55,16 @@ export default function CommandPanel({ onTaskStart, onStep }) {
     if (e.key === "Enter" && !loading) handleSubmit();
   }
 
+  function handleMouseMove(e) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    e.currentTarget.style.setProperty("--mouse-x", `${x}px`);
+    e.currentTarget.style.setProperty("--mouse-y", `${y}px`);
+  }
+
   return (
-    <div className="command-panel">
+    <div className="command-panel" onMouseMove={handleMouseMove}>
       <h2>Command Center</h2>
       <p className="hint">Describe the browser task you want the agent to perform.</p>
 
@@ -73,7 +87,8 @@ export default function CommandPanel({ onTaskStart, onStep }) {
       <div className="examples">
         <p>Try these:</p>
         <ul>
-          <li onClick={() => setCommand("Go to google.com and search for Python tutorials")}>Go to google.com and search for Python tutorials</li>
+          <li onClick={() => setCommand("Search YouTube for the latest Mr Beast video")}>Search YouTube for the latest Mr Beast video</li>
+          <li onClick={() => setCommand("Search Google for the best AI tools")}>Search Google for the best AI tools</li>
           <li onClick={() => setCommand("Fill the contact form with my profile details")}>Fill the contact form with my profile details</li>
           <li onClick={() => setCommand("Summarize the current page")}>Summarize the current page</li>
         </ul>

@@ -149,8 +149,8 @@ async def websocket_endpoint(websocket: WebSocket, task_id: str):
 
     try:
         while True:
-            # Keep connection alive; updates are pushed via broadcast()
-            await asyncio.sleep(1)
+            # Block until client sends text or disconnects (0 CPU overhead)
+            await websocket.receive_text()
     except WebSocketDisconnect:
         active_connections[task_id].remove(websocket)
 

@@ -7,8 +7,16 @@ export default function ActivityLog({ steps, taskId }) {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [steps]);
 
+  function handleMouseMove(e) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    e.currentTarget.style.setProperty("--mouse-x", `${x}px`);
+    e.currentTarget.style.setProperty("--mouse-y", `${y}px`);
+  }
+
   return (
-    <div className="activity-log">
+    <div className="activity-log" onMouseMove={handleMouseMove}>
       <h2>
         Activity Log
         {taskId && <span className="task-id">#{taskId.slice(0, 8)}</span>}
@@ -18,23 +26,41 @@ export default function ActivityLog({ steps, taskId }) {
         <p className="empty">Agent steps will appear here as the task runs…</p>
       ) : (
         <ul className="steps">
-          {steps.map((step, i) => (
-            <li
-              key={`${step}-${i}`}
-              className={
-                step.startsWith("❌")
-                  ? "step error"
-                  : step.startsWith("✅")
-                  ? "step success"
-                  : step === "🏁 DONE"
-                  ? "step done"
-                  : "step info"
-              }
-            >
-              <span className="step-num">{i + 1}</span>
-              <span>{step}</span>
-            </li>
-          ))}
+          {steps.map((step, i) => {
+            const parts = step.split("|||");
+            const displayStep = parts[0];
+            const url = parts[1] ? parts[1].trim() : null;
+
+            return (
+              <li
+                key={`${step}-${i}`}
+                className={
+                  displayStep.startsWith("❌")
+                    ? "step error"
+                    : displayStep.startsWith("✅")
+                    ? "step success"
+                    : displayStep === "🏁 DONE"
+                    ? "step done"
+                    : "step info"
+                }
+              >
+                <span className="step-num">{i + 1}</span>
+                <span style={{ display: "flex", width: "100%", justifyContent: "space-between", alignItems: "center" }}>
+                  <span>{displayStep}</span>
+                  {url && (
+                    <a
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="step-link"
+                    >
+                      Visit ↗
+                    </a>
+                  )}
+                </span>
+              </li>
+            );
+          })}
           <li ref={bottomRef} className="step info" />
         </ul>
       )}

@@ -33,6 +33,13 @@ export default function ProfileSettings() {
       });
       if (!res.ok) throw new Error("Save failed");
       setStatus("✅ Profile saved successfully!");
+      setProfile({
+        name: "",
+        email: "",
+        phone: "",
+        address: "",
+        resume_text: "",
+      });
     } catch (err) {
       setStatus(`❌ ${err.message}`);
     } finally {
@@ -44,8 +51,16 @@ export default function ProfileSettings() {
     setProfile((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   }
 
+  function handleMouseMove(e) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    e.currentTarget.style.setProperty("--mouse-x", `${x}px`);
+    e.currentTarget.style.setProperty("--mouse-y", `${y}px`);
+  }
+
   return (
-    <div className="profile-settings">
+    <div className="profile-settings" onMouseMove={handleMouseMove}>
       <h2>User Profile</h2>
       <p className="hint">The agent uses this profile to prefill forms and assist with tasks.</p>
 
@@ -74,7 +89,7 @@ export default function ProfileSettings() {
             name="resume_text"
             value={profile.resume_text}
             onChange={handleChange}
-            rows={6}
+            rows={4}
             placeholder="Paste your resume text here"
           />
         </div>
