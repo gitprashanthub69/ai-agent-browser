@@ -171,13 +171,15 @@ Clean topic:"""
 
                 # Step 3: Display search results
                 if search_results:
-                    await step(f"📄 Found {len(search_results)} relevant results:")
+                    await step(f"📄 Found {len(search_results)} live web results:")
                     await asyncio.sleep(0.1)
                     for i, res in enumerate(search_results):
                         title = res.get('title', 'Website')
                         link = res.get('href', '')
                         await step(f"   🔗 [{i+1}] {title} ||| {link}")
                         await asyncio.sleep(0.1)
+                else:
+                    await step("⚠️ Live web results (DuckDuckGo) are currently rate-limited. Skipping to guaranteed deep-links...")
 
                 # Step 4: Generate smart platform links dynamically
                 encoded_query = urllib.parse.quote_plus(clean_query)
