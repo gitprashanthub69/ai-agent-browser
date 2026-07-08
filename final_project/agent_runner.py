@@ -162,10 +162,30 @@ Clean topic:"""
                 # Step 2: Search DuckDuckGo with the cleaned query
                 search_results = []
                 try:
-                    from duckduckgo_search import DDGS
-                    ddgs = DDGS()
+                    import requests
+                    from bs4 import BeautifulSoup
+                    
                     await step("🌐 Querying search engines for relevant results...")
-                    search_results = list(ddgs.text(clean_query, max_results=10))
+                    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+                    res = requests.get(f'https://html.duckduckgo.com/html/?q={urllib.parse.quote_plus(clean_query)}', headers=headers, timeout=5)
+                    soup = BeautifulSoup(res.text, 'html.parser')
+                    
+                    for a in soup.select('a.result__a')[:10]:
+                        title = a.text.strip()
+                        raw_href = a.get('href', '')
+                        
+                        # Extract actual URL from uddg= parameter
+                        link = raw_href
+                        if 'uddg=' in raw_href:
+                            parsed = urllib.parse.urlparse(raw_href)
+                            query_params = urllib.parse.parse_qs(parsed.query)
+                            if 'uddg' in query_params:
+                                link = query_params['uddg'][0]
+                            elif raw_href.startswith('//'):
+                                link = 'https:' + raw_href
+                                
+                        if title and link:
+                            search_results.append({'title': title, 'href': link})
                 except Exception as e:
                     await step(f"⚠️ Live search unavailable ({type(e).__name__}), using direct links...")
 
