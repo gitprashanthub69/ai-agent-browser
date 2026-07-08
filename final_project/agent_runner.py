@@ -57,44 +57,7 @@ async def run_agent_task(task_id: str, command: str, broadcast_fn):
         else:
             # Simulation mode — shows the pipeline working with realistic logs
             lowered = command.lower()
-            if "youtube" in lowered or "video" in lowered:
-                try:
-                    from duckduckgo_search import DDGS
-                    ddgs = DDGS()
-                    await step(f"📋 Initializing live web API for video search: '{command}'")
-                    await asyncio.sleep(0.4)
-                    await step("🌐 Contacting search engines...")
-                    
-                    # Search youtube videos specifically
-                    search_results = list(ddgs.text(f"site:youtube.com {command}", max_results=5))
-                    
-                    await step("📄 Video results retrieved successfully:")
-                    await asyncio.sleep(0.1)
-                    
-                    for i, res in enumerate(search_results):
-                        title = res.get('title', 'Video').split(' - YouTube')[0]
-                        link = res.get('href', '')
-                        await step(f"   🔗 [{i+1}] {title} ||| {link}")
-                        await asyncio.sleep(0.1)
-                        
-                    import urllib.parse
-                    encoded_query = urllib.parse.quote_plus(command)
-                    await step(f"✅ Video search task completed successfully! ||| https://www.youtube.com/results?search_query={encoded_query}")
-                    output = f"Retrieved {len(search_results)} video results"
-                except Exception as e:
-                    await step(f"⚠️ Live search blocked ({type(e).__name__}). Using offline fallback...")
-                    import urllib.parse
-                    encoded_query = urllib.parse.quote_plus(command)
-                    search_url = f"https://www.youtube.com/results?search_query={encoded_query}"
-                    
-                    await step(f"   🔗 [1] Official Video for '{command}' ||| {search_url}")
-                    await asyncio.sleep(0.1)
-                    await step(f"   🔗 [2] Relevant Results for '{command}' ||| {search_url}")
-                    
-                    await step(f"✅ Video search task completed successfully! ||| {search_url}")
-                    output = "Retrieved fallback video results"
-                        
-            elif "form" in lowered or "profile" in lowered or "fill" in lowered:
+            if "form" in lowered or "profile" in lowered or "fill" in lowered:
                 await step(f"📋 Parsing intent for form auto-fill: '{command}'")
                 await asyncio.sleep(0.4)
                 await step("👤 Reading stored user profile database...")
