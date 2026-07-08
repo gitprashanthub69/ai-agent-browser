@@ -6,6 +6,7 @@ import FormModule from "./components/FormModule";
 import EmailModule from "./components/EmailModule";
 import SummaryModule from "./components/SummaryModule";
 import CalendarModule from "./components/CalendarModule";
+import MemoryModule from "./components/MemoryModule";
 import "./App.css";
 
 export default function App() {
@@ -118,15 +119,7 @@ export default function App() {
         {page === "email" && <EmailModule />}
         {page === "summary" && <SummaryModule />}
         {page === "calendar" && <CalendarModule />}
-        {page === "memory" && (
-          <div className="module-panel">
-            <h2>Memory Storage</h2>
-            <p className="hint">View facts, preferences, and data saved from previous interactions.</p>
-            <div className="glass-panel" style={{padding: '20px', marginTop: '20px'}}>
-              <p style={{opacity: 0.7}}>No memories saved yet. (Module 6 backend connecting soon).</p>
-            </div>
-          </div>
-        )}
+        {page === "memory" && <MemoryModule />}
         {page === "profile" && <ProfileSettings />}
       </main>
     </div>

@@ -33,13 +33,6 @@ export default function ProfileSettings() {
       });
       if (!res.ok) throw new Error("Save failed");
       setStatus("✅ Profile saved successfully!");
-      setProfile({
-        name: "",
-        email: "",
-        phone: "",
-        address: "",
-        resume_text: "",
-      });
     } catch (err) {
       setStatus(`❌ ${err.message}`);
     } finally {

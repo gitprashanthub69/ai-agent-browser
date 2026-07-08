@@ -126,48 +126,97 @@ async def run_agent_task(task_id: str, command: str, broadcast_fn):
                 await step("✅ Summary generation complete!")
                 output = "Generated page summary"
             else:
+                # ── Smart AI-Powered Search ──
+                import urllib.parse
+                import os
+
+                # Step 1: Use Gemini AI to extract the real search intent
+                clean_query = command
+                try:
+                    import google.generativeai as genai
+                    genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
+                    model = genai.GenerativeModel("gemini-1.5-flash")
+                    await step("🧠 Using AI to understand your search intent...")
+                    await asyncio.sleep(0.3)
+                    
+                    extract_prompt = f"""Extract ONLY the core search topic from this user command. Remove any instructions like "search", "google", "find", "look up" etc. Return ONLY the clean topic, nothing else.
+
+User command: "{command}"
+Clean topic:"""
+                    response = model.generate_content(extract_prompt)
+                    ai_query = response.text.strip().strip('"').strip("'")
+                    if ai_query and len(ai_query) > 2:
+                        clean_query = ai_query
+                except Exception:
+                    # Fallback: manual prefix stripping
+                    for prefix in ["search google for", "search youtube for", "search for", "look up", "find me", "find", "search", "google"]:
+                        if clean_query.lower().startswith(prefix):
+                            clean_query = clean_query[len(prefix):].strip()
+                            break
+                    if not clean_query:
+                        clean_query = command
+
+                await step(f"📋 Searching for: '{clean_query}'")
+                await asyncio.sleep(0.3)
+
+                # Step 2: Search DuckDuckGo with the cleaned query
+                search_results = []
                 try:
                     from duckduckgo_search import DDGS
                     ddgs = DDGS()
-                    await step(f"📋 Initializing live web API search for: '{command}'")
-                    await asyncio.sleep(0.4)
-                    await step("🌐 Querying global search indexes...")
-                    
-                    search_results = list(ddgs.text(command, max_results=3))
-                    
-                    await step("📄 Search results retrieved successfully:")
+                    await step("🌐 Querying search engines for relevant results...")
+                    search_results = list(ddgs.text(clean_query, max_results=5))
+                except Exception as e:
+                    await step(f"⚠️ Live search unavailable ({type(e).__name__}), using direct links...")
+
+                # Step 3: Display search results
+                if search_results:
+                    await step(f"📄 Found {len(search_results)} relevant results:")
                     await asyncio.sleep(0.1)
-                    
                     for i, res in enumerate(search_results):
                         title = res.get('title', 'Website')
                         link = res.get('href', '')
                         await step(f"   🔗 [{i+1}] {title} ||| {link}")
                         await asyncio.sleep(0.1)
-                        
-                    import urllib.parse
-                    encoded_query = urllib.parse.quote_plus(command)
-                    google_url = f"https://www.google.com/search?q={encoded_query}"
-                    yt_url = f"https://www.youtube.com/results?search_query={encoded_query}"
-                    
-                    await step("🎥 Also retrieving video results...")
-                    await asyncio.sleep(0.3)
-                    await step(f"   🔗 [Video] YouTube results for '{command}' ||| {yt_url}")
-                    
-                    await step(f"✅ Search task completed successfully! ||| {google_url}")
-                    output = f"Retrieved {len(search_results)} search results and video links"
-                except Exception as e:
-                    await step(f"⚠️ Live search blocked ({type(e).__name__}). Using offline fallback...")
-                    import urllib.parse
-                    encoded_query = urllib.parse.quote_plus(command)
-                    search_url = f"https://www.google.com/search?q={encoded_query}"
-                    yt_url = f"https://www.youtube.com/results?search_query={encoded_query}"
-                    
-                    await step(f"   🔗 [1] Google Search for '{command}' ||| {search_url}")
-                    await asyncio.sleep(0.1)
-                    await step(f"   🔗 [2] YouTube Search for '{command}' ||| {yt_url}")
-                    
-                    await step(f"✅ Search task completed successfully! ||| {search_url}")
-                    output = "Retrieved fallback search results"
+
+                # Step 4: Generate smart platform links dynamically
+                encoded_query = urllib.parse.quote_plus(clean_query)
+                
+                # Always include Google and YouTube
+                platform_links = [
+                    ("🔍 Google", f"https://www.google.com/search?q={encoded_query}"),
+                    ("🎥 YouTube", f"https://www.youtube.com/results?search_query={encoded_query}"),
+                ]
+
+                # Dynamically add relevant platforms based on topic
+                topic_lower = clean_query.lower()
+                
+                # Programming / Tech topics
+                if any(kw in topic_lower for kw in ["code", "programming", "python", "java", "algorithm", "data structure", "api", "developer", "software", "react", "node", "css", "html", "sql", "git", "linux", "ai", "machine learning", "deep learning", "llm", "tutorial", "how to"]):
+                    platform_links.append(("💻 GeeksforGeeks", f"https://www.geeksforgeeks.org/search/?q={encoded_query}"))
+                    platform_links.append(("📚 Stack Overflow", f"https://stackoverflow.com/search?q={encoded_query}"))
+                    platform_links.append(("🐙 GitHub", f"https://github.com/search?q={encoded_query}&type=repositories"))
+
+                # Blog / Article topics
+                platform_links.append(("📝 Medium Blogs", f"https://medium.com/search?q={encoded_query}"))
+                platform_links.append(("💬 Reddit", f"https://www.reddit.com/search/?q={encoded_query}"))
+                
+                # Academic / Research
+                if any(kw in topic_lower for kw in ["research", "paper", "study", "science", "physics", "biology", "math", "thesis"]):
+                    platform_links.append(("🎓 Google Scholar", f"https://scholar.google.com/scholar?q={encoded_query}"))
+
+                # News
+                if any(kw in topic_lower for kw in ["news", "latest", "update", "breaking", "today"]):
+                    platform_links.append(("📰 Google News", f"https://news.google.com/search?q={encoded_query}"))
+
+                await step("🌍 Deep-linking across platforms:")
+                await asyncio.sleep(0.2)
+                for label, url in platform_links:
+                    await step(f"   🔗 {label} ||| {url}")
+                    await asyncio.sleep(0.08)
+
+                await step(f"✅ Search completed — {len(search_results)} results + {len(platform_links)} platform links! ||| {platform_links[0][1]}")
+                output = f"Retrieved {len(search_results)} results across {len(platform_links)} platforms"
 
         # Mark task complete in DB
         with get_session() as session:

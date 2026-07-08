@@ -91,6 +91,14 @@ def post_profile(profile_data: UserProfile):
         else:
             session.add(profile_data)
         session.commit()
+    
+    # Sync with Module 6 Memory Store
+    try:
+        from module6_memory.memory_store import set_profile_bulk
+        set_profile_bulk(profile_data.model_dump() if hasattr(profile_data, "model_dump") else profile_data.dict())
+    except Exception as e:
+        print(f"Warning: Failed to sync profile with memory store: {e}")
+
     return {"message": "Profile saved successfully"}
 
 @app.websocket("/ws/{task_id}")
