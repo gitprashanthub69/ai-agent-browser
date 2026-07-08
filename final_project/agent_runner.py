@@ -165,7 +165,7 @@ Clean topic:"""
                     from duckduckgo_search import DDGS
                     ddgs = DDGS()
                     await step("🌐 Querying search engines for relevant results...")
-                    search_results = list(ddgs.text(clean_query, max_results=5))
+                    search_results = list(ddgs.text(clean_query, max_results=10))
                 except Exception as e:
                     await step(f"⚠️ Live search unavailable ({type(e).__name__}), using direct links...")
 
