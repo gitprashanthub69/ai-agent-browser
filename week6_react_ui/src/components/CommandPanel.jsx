@@ -55,16 +55,8 @@ export default function CommandPanel({ onTaskStart, onStep, onTaskComplete }) {
     if (e.key === "Enter" && !loading) handleSubmit();
   }
 
-  function handleMouseMove(e) {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    e.currentTarget.style.setProperty("--mouse-x", `${x}px`);
-    e.currentTarget.style.setProperty("--mouse-y", `${y}px`);
-  }
-
   return (
-    <div className="command-panel" onMouseMove={handleMouseMove}>
+    <div className="command-panel">
       <h2>Command Center</h2>
       <p className="hint">Describe the browser task you want the agent to perform.</p>
 

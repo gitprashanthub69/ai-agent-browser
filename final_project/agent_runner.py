@@ -106,7 +106,7 @@ async def run_agent_task(task_id: str, command: str, broadcast_fn):
 
 User command: "{command}"
 Clean topic:"""
-                    response = model.generate_content(extract_prompt)
+                    response = await asyncio.to_thread(model.generate_content, extract_prompt)
                     ai_query = response.text.strip().strip('"').strip("'")
                     if ai_query and len(ai_query) > 2:
                         clean_query = ai_query
@@ -134,7 +134,11 @@ Clean topic:"""
                         await step("🎥 Scraping YouTube search results directly...")
                         import urllib.request, re, json
                         yt_q = urllib.parse.quote_plus(lower_q.replace('youtube', '').replace('video', '').strip())
-                        html = urllib.request.urlopen(f'https://www.youtube.com/results?search_query={yt_q}', timeout=8).read().decode('utf-8', errors='ignore')
+                        
+                        def fetch_yt():
+                            return urllib.request.urlopen(f'https://www.youtube.com/results?search_query={yt_q}', timeout=8).read().decode('utf-8', errors='ignore')
+                            
+                        html = await asyncio.to_thread(fetch_yt)
                         match = re.search(r'ytInitialData\s*=\s*(\{.+?\});', html)
                         if match:
                             data = json.loads(match.group(1))
@@ -148,7 +152,11 @@ Clean topic:"""
                     elif "github" in lower_q or "repo" in lower_q:
                         await step("🐙 Querying GitHub API for repositories...")
                         gh_q = urllib.parse.quote_plus(lower_q.replace('github', '').replace('repo', '').strip())
-                        res = requests.get(f'https://api.github.com/search/repositories?q={gh_q}', headers={'User-Agent': 'Mozilla/5.0'}, timeout=5).json()
+                        
+                        def fetch_gh():
+                            return requests.get(f'https://api.github.com/search/repositories?q={gh_q}', headers={'User-Agent': 'Mozilla/5.0'}, timeout=5).json()
+                            
+                        res = await asyncio.to_thread(fetch_gh)
                         for r in res.get('items', [])[:5]:
                             desc = (r['description'][:50] + '...') if r['description'] else 'No description'
                             search_results.append({'title': f"🐙 {r['full_name']} — {desc}", 'href': r['html_url']})
@@ -160,7 +168,10 @@ Clean topic:"""
                         if "reddit" in lower_q and "site:reddit.com" not in lower_q:
                             actual_query += " site:reddit.com"
                             
-                        res = requests.get(f'https://html.duckduckgo.com/html/?q={urllib.parse.quote_plus(actual_query)}', headers=headers, timeout=5)
+                        def fetch_ddg():
+                            return requests.get(f'https://html.duckduckgo.com/html/?q={urllib.parse.quote_plus(actual_query)}', headers=headers, timeout=5)
+                            
+                        res = await asyncio.to_thread(fetch_ddg)
                         soup = BeautifulSoup(res.text, 'html.parser')
                         
                         for a in soup.select('a.result__a')[:10]:

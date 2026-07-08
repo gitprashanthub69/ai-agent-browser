@@ -7,16 +7,8 @@ export default function ActivityLog({ steps, taskId }) {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [steps]);
 
-  function handleMouseMove(e) {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    e.currentTarget.style.setProperty("--mouse-x", `${x}px`);
-    e.currentTarget.style.setProperty("--mouse-y", `${y}px`);
-  }
-
   return (
-    <div className="activity-log" onMouseMove={handleMouseMove}>
+    <div className="activity-log">
       <h2>
         Activity Log
         {taskId && <span className="task-id">#{taskId.slice(0, 8)}</span>}
