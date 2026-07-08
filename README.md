@@ -95,7 +95,6 @@ ai-browser-agent/
 │   └── data/                      # Runtime databases (memory.db)
 │
 ├── tests/                         # Test suite
-├── venv/                          # Python virtual environment
 ├── .gitignore
 └── README.md
 ```
@@ -350,7 +349,7 @@ Try these in the Command Center:
 
 ## 👤 Author
 
-**Sagar** — SOC (Summer of Code) Participant
+**Prashant Rohilla** — SOC (Summer of Code) Participant
 
 - GitHub: [@gitprashanthub69](https://github.com/gitprashanthub69)
 
