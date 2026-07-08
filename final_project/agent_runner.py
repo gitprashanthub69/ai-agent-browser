@@ -159,33 +159,62 @@ Clean topic:"""
                 await step(f"📋 Searching for: '{clean_query}'")
                 await asyncio.sleep(0.3)
 
-                # Step 2: Search DuckDuckGo with the cleaned query
+                # Step 2: Search target platform with the cleaned query
                 search_results = []
+                import requests
+                from bs4 import BeautifulSoup
+                
+                lower_q = clean_query.lower()
+                
                 try:
-                    import requests
-                    from bs4 import BeautifulSoup
-                    
-                    await step("🌐 Querying search engines for relevant results...")
-                    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
-                    res = requests.get(f'https://html.duckduckgo.com/html/?q={urllib.parse.quote_plus(clean_query)}', headers=headers, timeout=5)
-                    soup = BeautifulSoup(res.text, 'html.parser')
-                    
-                    for a in soup.select('a.result__a')[:10]:
-                        title = a.text.strip()
-                        raw_href = a.get('href', '')
+                    if "youtube" in lower_q or "video" in lower_q:
+                        await step("🎥 Scraping YouTube search results directly...")
+                        import urllib.request, re, json
+                        yt_q = urllib.parse.quote_plus(lower_q.replace('youtube', '').replace('video', '').strip())
+                        html = urllib.request.urlopen(f'https://www.youtube.com/results?search_query={yt_q}', timeout=8).read().decode('utf-8', errors='ignore')
+                        match = re.search(r'ytInitialData\s*=\s*(\{.+?\});', html)
+                        if match:
+                            data = json.loads(match.group(1))
+                            contents = data['contents']['twoColumnSearchResultsRenderer']['primaryContents']['sectionListRenderer']['contents'][0]['itemSectionRenderer']['contents']
+                            for v in contents:
+                                if 'videoRenderer' in v:
+                                    title = v['videoRenderer']['title']['runs'][0]['text']
+                                    vid = v['videoRenderer']['videoId']
+                                    search_results.append({'title': f"🎥 {title}", 'href': f"https://www.youtube.com/watch?v={vid}"})
+                                    if len(search_results) >= 5: break
+                    elif "github" in lower_q or "repo" in lower_q:
+                        await step("🐙 Querying GitHub API for repositories...")
+                        gh_q = urllib.parse.quote_plus(lower_q.replace('github', '').replace('repo', '').strip())
+                        res = requests.get(f'https://api.github.com/search/repositories?q={gh_q}', headers={'User-Agent': 'Mozilla/5.0'}, timeout=5).json()
+                        for r in res.get('items', [])[:5]:
+                            desc = (r['description'][:50] + '...') if r['description'] else 'No description'
+                            search_results.append({'title': f"🐙 {r['full_name']} — {desc}", 'href': r['html_url']})
+                    else:
+                        await step("🌐 Querying search engines for relevant results...")
+                        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+                        # If reddit is requested, make sure it's in the query
+                        actual_query = clean_query
+                        if "reddit" in lower_q and "site:reddit.com" not in lower_q:
+                            actual_query += " site:reddit.com"
+                            
+                        res = requests.get(f'https://html.duckduckgo.com/html/?q={urllib.parse.quote_plus(actual_query)}', headers=headers, timeout=5)
+                        soup = BeautifulSoup(res.text, 'html.parser')
                         
-                        # Extract actual URL from uddg= parameter
-                        link = raw_href
-                        if 'uddg=' in raw_href:
-                            parsed = urllib.parse.urlparse(raw_href)
-                            query_params = urllib.parse.parse_qs(parsed.query)
-                            if 'uddg' in query_params:
-                                link = query_params['uddg'][0]
-                            elif raw_href.startswith('//'):
-                                link = 'https:' + raw_href
-                                
-                        if title and link:
-                            search_results.append({'title': title, 'href': link})
+                        for a in soup.select('a.result__a')[:10]:
+                            title = a.text.strip()
+                            raw_href = a.get('href', '')
+                            
+                            link = raw_href
+                            if 'uddg=' in raw_href:
+                                parsed = urllib.parse.urlparse(raw_href)
+                                query_params = urllib.parse.parse_qs(parsed.query)
+                                if 'uddg' in query_params:
+                                    link = query_params['uddg'][0]
+                                elif raw_href.startswith('//'):
+                                    link = 'https:' + raw_href
+                                    
+                            if title and link:
+                                search_results.append({'title': title, 'href': link})
                 except Exception as e:
                     await step(f"⚠️ Live search unavailable ({type(e).__name__}), using direct links...")
 
