@@ -87,10 +87,10 @@ export default function CommandPanel({ onTaskStart, onStep, onTaskComplete }) {
       <div className="examples">
         <p>Try these:</p>
         <ul>
-          <li onClick={() => setCommand("Search YouTube for the latest Mr Beast video")}>Search YouTube for the latest Mr Beast video</li>
-          <li onClick={() => setCommand("Search Google for the best AI tools")}>Search Google for the best AI tools</li>
-          <li onClick={() => setCommand("Fill the contact form with my profile details")}>Fill the contact form with my profile details</li>
-          <li onClick={() => setCommand("Summarize the current page")}>Summarize the current page</li>
+          <li onClick={() => setCommand("Search YouTube for LangChain tutorial")}>Search YouTube for LangChain tutorial</li>
+          <li onClick={() => setCommand("Search GitHub for FastAPI projects")}>Search GitHub for FastAPI projects</li>
+          <li onClick={() => setCommand("Search for Python interview questions 2025")}>Search for Python interview questions 2025</li>
+          <li onClick={() => setCommand("Search Reddit for AI tools for students")}>Search Reddit for AI tools for students</li>
         </ul>
       </div>
     </div>
